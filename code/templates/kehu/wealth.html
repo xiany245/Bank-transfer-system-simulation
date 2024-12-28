@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>财富管理</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #28a745, #4caf50);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .transaction-list {
+            margin-top: 20px;
+        }
+        .transaction-item {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>总余额</h2>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="text-center">￥{{ total_balance }}</h3>
+                    </div>
+                </div>
+                <div class="card transaction-list">
+                    <div class="card-header">
+                        <h2>交易记录</h2>
+                    </div>
+                    <div class="card-body">
+                        {% for transaction in transactions %}
+                        <div class="transaction-item">
+                            {% if transaction[2] in uid_accounts %}
+                            <p class="text-danger">-￥{{ '%.2f'|format(transaction[1]) }} (转出账户: {{ transaction[2] }}, 转入账户: {{ transaction[3] }})</p>
+                            {% elif transaction[3] in uid_accounts %}
+                            <p class="text-success">+￥{{ '%.2f'|format(transaction[1]) }} (转出账户: {{ transaction[2] }}, 转入账户: {{ transaction[3] }})</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <p>用户账户: {{ uid_accounts }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入Bootstrap JS和依赖 -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
+
+
+

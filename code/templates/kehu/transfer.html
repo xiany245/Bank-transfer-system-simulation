@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>转账界面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 50%;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .form-group span {
+            color: red;
+            display: none;
+        }
+        .button-group {
+            text-align: center;
+        }
+        .button-group button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button-group button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>转账</h2>
+    <div class="form-group">
+        <label for="from-account">转出账户</label>
+        <input type="text" id="from-account">
+        <span id="from-account-error">转出账户不存在或非当前客户账户</span>
+    </div>
+    <div class="form-group">
+        <label for="to-account">转入账户</label>
+        <input type="text" id="to-account">
+        <span id="to-account-error">转入账户不存在</span>
+    </div>
+    <div class="form-group">
+        <label for="amount">交易金额</label>
+        <input type="number" id="amount">
+        <span id="amount-error">交易金额不能大于转出账户余额</span>
+    </div>
+    <div class="button-group">
+        <button onclick="validateAndTransfer()">确认转账</button>
+    </div>
+</div>
+
+<script>
+    async function validateAndTransfer() {
+    const fromAccount = document.getElementById('from-account').value;
+    const toAccount = document.getElementById('to-account').value;
+    const amount = parseFloat(document.getElementById('amount').value);
+
+    document.getElementById('from-account-error').style.display = 'none';
+    document.getElementById('to-account-error').style.display = 'none';
+    document.getElementById('amount-error').style.display = 'none';
+
+    try {
+        console.log('Fetching accounts...');
+        const accounts = await fetch('/fetch_accounts').then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        });
+        console.log('Accounts fetched:', accounts);
+
+        const customerAccounts = await fetch('/fetch_customer_accounts').then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        });
+        console.log('Customer accounts fetched:', customerAccounts);
+
+        console.log('To Account:', toAccount);
+        console.log('From Account:', fromAccount);
+
+        // Compare accounts as strings
+        if (!accounts.includes(toAccount)) {
+            document.getElementById('to-account-error').style.display = 'block';
+            console.log('To account does not exist:', toAccount);
+            return;
+        }
+
+        if (!customerAccounts.includes(fromAccount)) {
+            document.getElementById('from-account-error').style.display = 'block';
+            console.log('From account does not belong to the customer:', fromAccount);
+            return;
+        }
+
+        const fromAccountBalance = await fetch(`/fetch_account_balance/${fromAccount}`).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        });
+        console.log('From account balance:', fromAccountBalance);
+
+        if (amount > fromAccountBalance) {
+            document.getElementById('amount-error').style.display = 'block';
+            console.log('Insufficient balance:', amount, '>', fromAccountBalance);
+            return;
+        }
+
+        sessionStorage.setItem('fromAccount', fromAccount);
+        sessionStorage.setItem('toAccount', toAccount);
+        sessionStorage.setItem('amount', amount);
+
+        console.log('Redirecting to payment password page...');
+        window.location.href = '/kehu/payment_password';
+    } catch (error) {
+        console.error('Error during transfer validation:', error);
+        alert('Error during transfer validation: ' + error.message);
+    }
+}
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
